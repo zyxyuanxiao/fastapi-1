@@ -11,7 +11,7 @@
 
 > 基于Python fastapi框架开发的文档社区网站
 
-### 🏠 [Homepage](www.fastapi.site)
+### 🏠 [Homepage](sms.hjx.pub)
 
 ## Install
 
