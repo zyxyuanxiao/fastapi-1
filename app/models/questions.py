@@ -1,6 +1,6 @@
-import orm
 from enum import Enum
-from sqlalchemy_utils.types.choice import ChoiceType
+
+import orm
 
 from ..db.basemodel import BaseModel
 from ..db.database import database, metadata

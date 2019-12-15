@@ -5,13 +5,13 @@ from pydantic import BaseModel, EmailStr
 
 class UserBase(BaseModel):
     username: str
-    email: EmailStr
+    avatar: str = None
+    # email: EmailStr
 
 
 class UserCreate(UserBase):
-    answers: str
+    nickname: str
     password: str
-    created_at: datetime = datetime.now()
 
 
 class UserActivated(UserBase):
@@ -22,8 +22,7 @@ class UserActivated(UserBase):
 
 class User(UserBase):
     id: int
-    answers: str
-    created_at: datetime = None
+    nickname: str
 
     class Config:
         orm_mode = True

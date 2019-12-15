@@ -1,11 +1,12 @@
-from fastapi import Depends, APIRouter, Path, Query
-from starlette.responses import JSONResponse
+from fastapi import Depends, APIRouter, Path, Query, Body
 from fastapi.exceptions import HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
+from starlette.responses import JSONResponse
 
 from app.schemas import user, token_sa
+from app.response.users import UserCreateResponse, UserCurrentResponse
 from app.services.authenticate import authenticate_user, create_access_token
-from app.api.operation.users import create_user, get_user_by_email, get_user_info, get_user_by_id
+from app.api.operation.users import create_user, get_user_by_username, get_user_info, get_user_by_id
 from app.api.operation.question import get_question
 from app.models.questions import QuestionChoices
 from app.services.jwt import oauth2_scheme
@@ -14,21 +15,21 @@ from app.services.smtp import async_send_message
 router = APIRouter()
 
 
-@router.post("/create/", response_model=user.User, tags=['users'])
-async def create_users(iuser: user.UserCreate, iquestion: QuestionChoices):
-    ouser = await get_user_by_email(iuser.email)
+@router.post("/create/", response_model=UserCreateResponse, tags=['users'])
+async def create_users(iuser: user.UserCreate):
+    ouser = await get_user_by_username(iuser.username)
     if ouser:
         raise HTTPException(
             status_code=400,
-            detail="Email has been used !!"
+            detail="username has been used !!"
         )
-    # oquestion = await get_question(iquestion)
-    return await create_user(iuser, 9)
+    return await create_user(iuser)
 
 
-@router.post("/login/", response_model=token_sa.Token, tags=['users'])
-async def user_login(form_data: OAuth2PasswordRequestForm = Depends()):
-    user = await authenticate_user(form_data.username, form_data.password)
+@router.post("/login/",response_model=UserCreateResponse, tags=['users'])
+# async def user_login(user: OAuth2PasswordRequestForm = Depends()):
+async def user_login(*, username: str = Body(...), password: str = Body(...)):
+    user = await authenticate_user(username, password)
     if not user:
         raise HTTPException(
             status_code=401,
@@ -37,12 +38,24 @@ async def user_login(form_data: OAuth2PasswordRequestForm = Depends()):
         )
     access_token = create_access_token(
         data={"email": user[0].email, "username": user[0].username})
-    return {"token": access_token, "token_type": "bearer"}
+    # return {"token": 1, "token_type": "bearer"}
+    return {"code": 0, "msg": "success", "data": {"Oauth-Token": access_token, "exprie": 86400*7}}
 
 
-@router.get("/info/", response_model=user.User, tags=['users'])
+
+@router.get("/current/", response_model=UserCreateResponse, tags=['users'])
 async def get_info(user: user.User = Depends(get_user_info)):
-    return user
+    content = {
+        "code": 0,
+        "msg": "success",
+        "data":{
+            "id": user.id,
+            "avatar": user.avatar,
+            "username": user.username,
+            "nickname": user.nickname
+        }
+    }
+    return JSONResponse(content=content)
 
 
 @router.get("/send/", tags=['users'])

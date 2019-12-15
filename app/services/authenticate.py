@@ -1,15 +1,14 @@
 from datetime import timedelta, datetime
 
 import jwt
-from jwt import PyJWTError
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 
-from app.api.operation.users import get_user_by_email
+from app.api.operation.users import get_user_by_username
 from app.services.jwt import verify_password, SECRET_KEY, ALGORITHM
 
 
-async def authenticate_user(email: str, password: str):
-    user = await get_user_by_email(email=email)
+async def authenticate_user(username: str, password: str):
+    user = await get_user_by_username(username=username)
     if not user:
         return False
     if not verify_password(password, user[0].password):

@@ -18,7 +18,7 @@ async def send_message(*, id: int, email: str = "1053522308@qq.com"):
     message = MIMEMultipart("alternative")
     message['From'] = "18734422941@163.com"
     message['To'] = email
-    message["Subject"] = "Please activate your account as soon as possible !"
+    message["Subject"] = "Please activate your username as soon as possible !"
 
     html_message = MIMEText(
         f"<html><body><a href='http://127.0.0.1:8000/users/activated/{id}?code={code}'>请点击本链接激活您的账户</a></body></html>", _subtype="html", _charset="utf-8"

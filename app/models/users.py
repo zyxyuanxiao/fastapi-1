@@ -13,11 +13,16 @@ class User(BaseModel):
     username = orm.String(max_length=50)
     password = orm.String(max_length=255)
     email = orm.String(max_length=50, unique=True, index=True)
+    phone = orm.String(allow_null=True, max_length=11)
+    nickname = orm.String(allow_null=True, max_length=50)
+    avatar = orm.String(allow_null=True, max_length=255)
+    status = orm.String(allow_null=True, max_length=10)
     is_active = orm.Boolean(default=False)
     question_id = orm.ForeignKey(
-        Questions
+        Questions,
+        allow_null=True
     )
-    answers = orm.String(max_length=255)
+    answers = orm.String(max_length=255, allow_null=True)
 
     def __str__(self):
         return self.username

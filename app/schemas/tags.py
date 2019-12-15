@@ -7,11 +7,13 @@ class TagBase(BaseModel):
 
 class TagCreate(TagBase):
     name: str
+    avatar: str = None
 
 
 class Tag(TagBase):
     id: int
     name: str
+    avatar: str = None
 
     class Config:
         orm_mode = True

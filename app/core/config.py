@@ -5,6 +5,8 @@ from ..db.database import create_connection, disconnect
 from app.api.routers.questions import router as questions_router
 from app.api.routers.users import router as users_router
 from app.api.routers.tags import router as tag_router
+from app.api.routers.articles import router as articles_router
+from app.api.routers.category import router as category_router
 
 # app = FastAPI(__name__)
 
@@ -31,7 +33,13 @@ def generate_application() -> FastAPI:
         users_router, prefix="/users"
     )
     application.include_router(
-        tag_router, prefix="/users"
+        tag_router, prefix="/tags"
+    )
+    application.include_router(
+        articles_router, prefix="/articles"
+    )
+    application.include_router(
+        category_router, prefix="/categorys"
     )
 
     return application

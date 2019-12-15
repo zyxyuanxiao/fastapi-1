@@ -1,8 +1,9 @@
 import random
 
 import jwt
-from jwt.exceptions import PyJWTError
+# from jwt import PyJWTError
 from fastapi import Depends
+from starlette.responses import JSONResponse
 from fastapi.exceptions import HTTPException
 
 from app.schemas import user
@@ -11,14 +12,18 @@ from app.models.questions import Questions
 from app.services.jwt import hash_password, oauth2_scheme, SECRET_KEY, ALGORITHM
 
 
-async def create_user(user_obj: user.UserCreate, question_id: int):
-    question_obj = await Questions.objects.get(id=question_id)
-    return await User.objects.create(username=user_obj.username, email=user_obj.email,
-                                     question_id=question_obj, password=hash_password(user_obj.password), answers=user_obj.answers)
+async def create_user(user_obj: user.UserCreate):
+    # question_obj = await Questions.objects.get(id=question_id)
+    user = await User.objects.create(username=user_obj.username, nickname=user_obj.nickname,
+                                     password=hash_password(user_obj.password), email=user_obj.username)
+    from app.services.authenticate import create_access_token
+    access_token = create_access_token(
+        data={"email": user_obj.nickname, "username": user_obj.username})
+    return {"code": 0, "msg": "success", "data": {"Oauth-Token": access_token, "exprie": 86400*7}}
 
 
-async def get_user_by_email(email: str):
-    return await User.objects.filter(email=email).all()
+async def get_user_by_username(username: str):
+    return await User.objects.filter(username=username).limit(1).all()
 
 
 async def get_user_by_id(id: int):
@@ -33,12 +38,12 @@ async def get_user_info(token: str = Depends(oauth2_scheme)):
     )
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        email: str = payload.get("email")
-        if email is None:
+        username: str = payload.get("username")
+        if username is None:
             raise credentials_exception
-    except PyJWTError:
+    except Exception:
         raise credentials_exception
-    user = await get_user_by_email(email=email)
+    user = await get_user_by_username(username=username)
     if not user:
         raise credentials_exception
     return user[0]
